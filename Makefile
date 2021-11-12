@@ -7,7 +7,8 @@ USE_INTEL = no
 USING_OSX = no
 
 EIGEN=/mnt/home/jsmith/apps/eigen/
-BOOST=/mnt/home/jsmith/apps/amd-rome/boost_1_76_0
+# BOOST=/mnt/home/jsmith/apps/boost_1_76_0
+BOOST=${BOOST_ROOT}
 
 #########################################
 # DO NOT EDIT ANYTHING BELOW THIS POINT #
@@ -17,9 +18,9 @@ git_commit=`git rev-parse HEAD`
 git_branch=`git branch | grep "^\*" | sed 's/^..//'`
 export VERSION_FLAGS=-Dgit_commit="\"$(git_commit)\"" -Dgit_branch="\"$(git_branch)\""
 
-FLAGS  = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST} $(VERSION_FLAGS)
-DFLAGS = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST} $(VERSION_FLAGS) -DComplex
-LFLAGS = -L${BOOST}/stage/lib -lboost_serialization -Wl,-rpath=$(BOOST)/stage/lib
+FLAGS  = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include $(VERSION_FLAGS)
+DFLAGS = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include $(VERSION_FLAGS) -DComplex
+LFLAGS = -L${BOOST}/lib -lboost_serialization -Wl,-rpath=$(BOOST)/lib
 
 ifeq ($(USE_INTEL), yes)
 	FLAGS += -qopenmp
