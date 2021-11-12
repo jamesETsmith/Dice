@@ -18,7 +18,7 @@ jobs:
 
       - name: Install Prerequites
         run: | 
-          sudo apt-get install -y libbost-all-dev
+          sudo apt-get install -y libboost-all-dev
           sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
 
       - name: Install and Test
