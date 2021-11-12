@@ -17,16 +17,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Prerequites
-        run: | 
+        run: |
+          sudo apt-get update
           sudo apt-get install -y libboost-all-dev
           sudo apt-get install -y libeigen3-dev
           sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
+          dpkg -L libboost-mpi
+          dpkg -L libeigen3
 
-      - name: Install and Test
+      - name: Compile
         run: |
           make -j Dice
 
-      - name: Upload to codecov
+      - name: Run Tests
         run: |
           cd tests
           ./runSmallTests.sh
