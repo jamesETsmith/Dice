@@ -6,8 +6,8 @@ USE_MPI = yes
 USE_INTEL = no
 USING_OSX = no
 
-EIGEN=/home/sash2458/newApps/eigen/
-BOOST=/home/sash2458/newApps/boost_1_67_0/
+EIGEN=/mnt/home/jsmith/apps/eigen/
+BOOST=/mnt/home/jsmith/apps/amd-rome/boost_1_76_0
 
 #########################################
 # DO NOT EDIT ANYTHING BELOW THIS POINT #
@@ -19,7 +19,7 @@ export VERSION_FLAGS=-Dgit_commit="\"$(git_commit)\"" -Dgit_branch="\"$(git_bran
 
 FLAGS  = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST} $(VERSION_FLAGS)
 DFLAGS = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST} $(VERSION_FLAGS) -DComplex
-LFLAGS = -L${BOOST}/stage/lib -lboost_serialization
+LFLAGS = -L${BOOST}/stage/lib -lboost_serialization -Wl,-rpath=$(BOOST)/stage/lib
 
 ifeq ($(USE_INTEL), yes)
 	FLAGS += -qopenmp
