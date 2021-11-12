@@ -22,8 +22,8 @@ jobs:
           sudo apt-get install -y libboost-all-dev
           sudo apt-get install -y libeigen3-dev
           sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
-          dpkg -L libboost-mpi
-          dpkg -L libeigen3
+          dpkg -L libboost-all-dev
+          dpkg -L libeigen3-dev
 
       - name: Compile
         run: |
