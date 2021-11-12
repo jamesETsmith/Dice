@@ -5,8 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         boost_version: [1.71, 1.75, 1.77]
     steps:
