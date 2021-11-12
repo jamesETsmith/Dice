@@ -21,17 +21,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libeigen3-dev
           sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
-      
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.0.0
-        id: install-boost
-        with:
-          # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here: 
-          # https://github.com/actions/boost-versions/blob/main/versions-manifest.json
-          boost_version: 1.77.0
-          # OPTIONAL: Specify a custon install location
-          boost_install_dir: ${{github.workspace}}
+          sudo apt-get install -y libboost-mpi-dev libboost-serialization-dev
 
 
       - name: Compile
@@ -39,7 +29,7 @@ jobs:
           make -j Dice
         env:
           EIGEN_ROOT: /usr/include/eigen3
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          BOOST_ROOT: /usr/local
 
       - name: Run Tests
         run: |
