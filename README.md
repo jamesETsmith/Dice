@@ -1,3 +1,4 @@
+[![CI](https://github.com/jamesETsmith/Dice/actions/workflows/ci.yaml/badge.svg)](https://github.com/jamesETsmith/Dice/actions/workflows/ci.yaml)
 <div><img src="https://github.com/sanshar/Dice/blob/master/docs/images/dice_lateral.png" height="360px"/></div>
 
 *Dice* implements the semistochastic heat bath configuration interaction (SHCI) algorithm for *ab initio* Hamiltonians of quantum chemical systems.
