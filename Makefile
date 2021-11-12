@@ -6,7 +6,7 @@ USE_MPI = yes
 USE_INTEL = no
 USING_OSX = no
 
-EIGEN=/mnt/home/jsmith/apps/eigen/
+EIGEN=${EIGEN_ROOT}
 # BOOST=/mnt/home/jsmith/apps/boost_1_76_0
 BOOST=${BOOST_ROOT}
 
