@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.9]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Prerequites
+        run: | 
+          sudo apt-get install -y libbost-all-dev
+          sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
+
+      - name: Install and Test
+        run: |
+          make -j Dice
+
+      - name: Upload to codecov
+        run: |
+          cd tests
+          ./runSmallTests.sh
