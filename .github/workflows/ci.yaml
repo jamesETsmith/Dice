@@ -21,6 +21,8 @@ jobs:
           sudo apt-get install -y openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev
           apt-cache policy libboost-mpi-dev
           sudo apt-get install -y libboost-mpi-dev libboost-serialization-dev
+          sudo apt-get install -y libhdf5-dev
+          dpkg -L libhdf5-dev
           whereis boost
           python -m pip install numpy pandas
 

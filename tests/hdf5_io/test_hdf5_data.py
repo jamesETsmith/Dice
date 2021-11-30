@@ -33,10 +33,10 @@ print(f"spatial 2RDM Shape {spat2RDM.shape}")
 spin2RDM = np.asarray(f["spin_rdm/2RDM_0_0"])
 print(f"spin 2RDM Shape {spin2RDM.shape}")
 
-unpacked_spin2RDM = np.zeros((spat1RDM.shape[0]*2,)*4)
+# unpacked_spin2RDM = np.zeros((spat1RDM.shape[0]*2,)*4)
 
-n_spin_orbs = spat1RDM.shape[0] * 2
-n_pairs = n_spin_orbs * (n_spin_orbs + 1)/2
-il = np.tril_indices(n_pairs)
-unpacked_spin2RDM[il,il] = spin2RDM
+# n_spin_orbs = spat1RDM.shape[0] * 2
+# n_pairs = n_spin_orbs * (n_spin_orbs + 1)/2
+# il = np.tril_indices(n_pairs)
+# unpacked_spin2RDM[il,il] = spin2RDM
 
