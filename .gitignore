@@ -45,3 +45,4 @@ benchmark/*/benchmark.out
 *slurm-*.out
 run_all.sh
 pyscf.out
+*.h5

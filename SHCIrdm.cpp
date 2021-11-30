@@ -18,6 +18,7 @@
   You should have received a copy of the GNU General Public License along with
   this program. If not, see <http://www.gnu.org/licenses/>.
 */
+// clang-format off
 #include "SHCIrdm.h"
 #include <algorithm>
 #include <boost/archive/binary_iarchive.hpp>
@@ -42,6 +43,8 @@
 #include "input.h"
 #include "integral.h"
 #include "math.h"
+#include "SHCIDataIO.h"
+#include <string>
 
 #ifndef SERIAL
 #include <boost/mpi.hpp>
@@ -375,38 +378,12 @@ void SHCIrdm::save1RDM(schedule &schd, MatrixXx &s1RDM, MatrixXx &oneRDM,
   int norbs = oneRDM.rows();
 
   if (commrank == 0) {
-    char file[5000];
-    sprintf(file, "%s/spatial1RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-            root);
-    std::ofstream ofs(file, std::ios::out);
-    ofs << nSpatOrbs << endl;
-
-    for (int n1 = 0; n1 < nSpatOrbs; n1++) {
-      for (int n2 = 0; n2 < nSpatOrbs; n2++) {
-        if (fabs(s1RDM(n1, n2)) > 1.e-15) {
-          ofs << str(boost::format("%3d   %3d   %16.12g\n") % n1 % n2 %
-                     s1RDM(n1, n2));
-        }
-      }
-    }
-    ofs.close();
+      std::string dataset_name = "/spatial_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(s1RDM, {nSpatOrbs, nSpatOrbs}, dataset_name);
 
     if (schd.DoSpinOneRDM) {
-      char file2[5000];
-      sprintf(file2, "%s/spin1RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-              root);
-      std::ofstream ofs2(file2, std::ios::out);
-      ofs2 << norbs << endl;
-
-      for (int n1 = 0; n1 < norbs; n1++) {
-        for (int n2 = 0; n2 < norbs; n2++) {
-          if (fabs(oneRDM(n1, n2)) > 1.e-6) {
-            ofs2 << str(boost::format("%3d   %3d   %10.8g\n") % n1 % n2 %
-                        oneRDM(n1, n2));
-          }
-        }
-      }
-      ofs2.close();
+      std::string dataset_name = "/spin_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(oneRDM, {norbs, norbs}, dataset_name);
     }
   }  // end if commrank
 }
@@ -497,22 +474,8 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
   int nSpatOrbs = pow(s2RDM.rows(), 0.5);
   if (commrank == 0) {
     {
-      char file[5000];
-      sprintf(file, "%s/spatialRDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-              root);
-      std::ofstream ofs(file, std::ios::out);
-      ofs << nSpatOrbs << endl;
-      for (int n1 = 0; n1 < nSpatOrbs; n1++)
-        for (int n2 = 0; n2 < nSpatOrbs; n2++)
-          for (int n3 = 0; n3 < nSpatOrbs; n3++)
-            for (int n4 = 0; n4 < nSpatOrbs; n4++) {
-              if (fabs(s2RDM(n1 * nSpatOrbs + n2, n3 * nSpatOrbs + n4)) >
-                  1.e-15)
-                ofs << str(boost::format("%3d   %3d   %3d   %3d   %16.12g\n") %
-                           n1 % n2 % n3 % n4 %
-                           s2RDM(n1 * nSpatOrbs + n2, n3 * nSpatOrbs + n4));
-            }
-      ofs.close();
+      std::string dataset_name = "/spatial_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(s2RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
     }
 
     if (schd.DoSpinRDM) {
@@ -525,33 +488,12 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
       ofs_bin.close();
       // ComputeEnergyFromSpinRDM(norbs, nelec, I1, I2, coreE, twoRDM);
 
-      //
-      // (New 06/21/21) Writing to text file
-      //
-      const int norbs = 2* nSpatOrbs;
-      char file[5000];
-      sprintf(file, "%s/spin2RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-              root);
-      std::ofstream ofs(file, std::ios::out);
-      ofs << norbs << endl;
 
-      for (int p = 0; p < norbs; p++)
-        for (int q = 0; q < norbs; q++)
-          for (int r = 0; r < norbs; r++)
-            for (int s = 0; s < norbs; s++) {
-              int P = max(p, q), Q = min(p, q);
-              int R = max(r, s), S = min(r, s);
-              double sgn = 1.;
-              if (P != p) sgn *= -1;
-              if (R != r) sgn *= -1;
-              double value = sgn * twoRDM(P * (P + 1) / 2 + Q, R * (R + 1) / 2 + S);
+      const int norbs = 2 * nSpatOrbs;
+      const int n_pairs = norbs*(norbs+1)/2;
+      std::string dataset_name = "/spin_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(twoRDM, {n_pairs, n_pairs}, dataset_name);
 
-
-              if (fabs(value) > 1.e-15)
-                ofs << str(boost::format("%3d   %3d   %3d   %3d   %16.12g\n") %
-                           p % q % r % s % value);
-            }
-      ofs.close();
     }
 
     {
