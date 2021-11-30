@@ -19,8 +19,8 @@ git_commit=`git rev-parse HEAD`
 git_branch=`git branch | grep "^\*" | sed 's/^..//'`
 export VERSION_FLAGS=-Dgit_commit="\"$(git_commit)\"" -Dgit_branch="\"$(git_branch)\""
 
-FLAGS  = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include $(VERSION_FLAGS)
-DFLAGS = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include $(VERSION_FLAGS) -DComplex
+FLAGS  = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include -I/${HDF5_ROOT}/include $(VERSION_FLAGS)
+DFLAGS = -std=c++11 -g -w -O3 -I${EIGEN} -I${BOOST}/include -I/${HDF5_ROOT}/include $(VERSION_FLAGS) -DComplex
 LFLAGS = -L${BOOST}/lib -lboost_serialization -Wl,-rpath=$(BOOST)/lib -L${HDF5_ROOT}/lib -lhdf5 -lhdf5_cpp -Wl,-rpath=$(HDF5_ROOT)/lib
 
 ifeq ($(USE_INTEL), yes)
