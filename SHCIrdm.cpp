@@ -515,32 +515,35 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
 
   if (commrank == 0) {
     // TXT
-    {
-      pout << "(save txt file)" << endl;
-      pout << std::flush;
-      char file[5000];
-      sprintf(file, "%s/spatial3RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-              root);
-      std::ofstream ofs(file, std::ios::out);
-      ofs << nSpatOrbs << endl;
-      for (int n0 = 0; n0 < nSpatOrbs; n0++)
-        for (int n1 = 0; n1 < nSpatOrbs; n1++)
-          for (int n2 = 0; n2 < nSpatOrbs; n2++)
-            for (int n3 = 0; n3 < nSpatOrbs; n3++)
-              for (int n4 = 0; n4 < nSpatOrbs; n4++)
-                for (int n5 = 0; n5 < nSpatOrbs; n5++) {
-                  if (abs(s3RDM(n0 * nSpatOrbs2 + n1 * nSpatOrbs + n2,
-                                n3 * nSpatOrbs2 + n4 * nSpatOrbs + n5)) >
-                      1.e-12)
-                    ofs << str(
-                        boost::format(
-                            "%3d   %3d   %3d   %3d   %3d   %3d   %20.14e\n") %
-                        n0 % n1 % n2 % n3 % n4 % n5 %
-                        s3RDM(n0 * nSpatOrbs2 + n1 * nSpatOrbs + n2,
-                              n3 * nSpatOrbs2 + n4 * nSpatOrbs + n5));
-                }
-      ofs.close();
-    }
+    // {
+    //   pout << "(save txt file)" << endl;
+    //   pout << std::flush;
+    //   char file[5000];
+    //   sprintf(file, "%s/spatial3RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
+    //           root);
+    //   std::ofstream ofs(file, std::ios::out);
+    //   ofs << nSpatOrbs << endl;
+    //   for (int n0 = 0; n0 < nSpatOrbs; n0++)
+    //     for (int n1 = 0; n1 < nSpatOrbs; n1++)
+    //       for (int n2 = 0; n2 < nSpatOrbs; n2++)
+    //         for (int n3 = 0; n3 < nSpatOrbs; n3++)
+    //           for (int n4 = 0; n4 < nSpatOrbs; n4++)
+    //             for (int n5 = 0; n5 < nSpatOrbs; n5++) {
+    //               if (abs(s3RDM(n0 * nSpatOrbs2 + n1 * nSpatOrbs + n2,
+    //                             n3 * nSpatOrbs2 + n4 * nSpatOrbs + n5)) >
+    //                   1.e-12)
+    //                 ofs << str(
+    //                     boost::format(
+    //                         "%3d   %3d   %3d   %3d   %3d   %3d   %20.14e\n") %
+    //                     n0 % n1 % n2 % n3 % n4 % n5 %
+    //                     s3RDM(n0 * nSpatOrbs2 + n1 * nSpatOrbs + n2,
+    //                           n3 * nSpatOrbs2 + n4 * nSpatOrbs + n5));
+    //             }
+    //   ofs.close();
+    // }
+    std::string dataset_name = "/spatial_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
+    save_rdm(s3RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
+
 
     // BIN
     {
@@ -563,6 +566,10 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
       std::ofstream ofs(file, std::ios::binary);
       boost::archive::binary_oarchive save(ofs);
       save << threeRDM;
+
+      //
+      std::string dataset_name = "/spin_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(threeRDM, {norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank
@@ -575,34 +582,37 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
   int n3 = n2 * n;
 
   if (commrank == 0) {
-    // TXT
-    {
-      pout << "(save txt file)" << endl;
-      pout << std::flush;
-      char file[5000];
-      sprintf(file, "%s/spatial4RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
-              root);
-      std::ofstream ofs(file, std::ios::out);
-      ofs << n << endl;
-      for (int c0 = 0; c0 < n; c0++)
-        for (int c1 = 0; c1 < n; c1++)
-          for (int c2 = 0; c2 < n; c2++)
-            for (int c3 = 0; c3 < n; c3++)
-              for (int d0 = 0; d0 < n; d0++)
-                for (int d1 = 0; d1 < n; d1++)
-                  for (int d2 = 0; d2 < n; d2++)
-                    for (int d3 = 0; d3 < n; d3++) {
-                      if (abs(s4RDM(n3 * c0 + n2 * c1 + n * c2 + c3,
-                                    n3 * d0 + n2 * d1 + n * d2 + d3)) > 1.e-12)
-                        ofs << str(
-                            boost::format("%3d   %3d   %3d   %3d   %3d   %3d   "
-                                          "%3d   %3d   %20.14e\n") %
-                            c0 % c1 % c2 % c3 % d0 % d1 % d2 % d3 %
-                            s4RDM(n3 * c0 + n2 * c1 + n * c2 + c3,
-                                  n3 * d0 + n2 * d1 + n * d2 + d3));
-                    }
-      ofs.close();
-    }
+    // // TXT
+    // {
+    //   pout << "(save txt file)" << endl;
+    //   pout << std::flush;
+    //   char file[5000];
+    //   sprintf(file, "%s/spatial4RDM.%d.%d.txt", schd.prefix[0].c_str(), root,
+    //           root);
+    //   std::ofstream ofs(file, std::ios::out);
+    //   ofs << n << endl;
+    //   for (int c0 = 0; c0 < n; c0++)
+    //     for (int c1 = 0; c1 < n; c1++)
+    //       for (int c2 = 0; c2 < n; c2++)
+    //         for (int c3 = 0; c3 < n; c3++)
+    //           for (int d0 = 0; d0 < n; d0++)
+    //             for (int d1 = 0; d1 < n; d1++)
+    //               for (int d2 = 0; d2 < n; d2++)
+    //                 for (int d3 = 0; d3 < n; d3++) {
+    //                   if (abs(s4RDM(n3 * c0 + n2 * c1 + n * c2 + c3,
+    //                                 n3 * d0 + n2 * d1 + n * d2 + d3)) > 1.e-12)
+    //                     ofs << str(
+    //                         boost::format("%3d   %3d   %3d   %3d   %3d   %3d   "
+    //                                       "%3d   %3d   %20.14e\n") %
+    //                         c0 % c1 % c2 % c3 % d0 % d1 % d2 % d3 %
+    //                         s4RDM(n3 * c0 + n2 * c1 + n * c2 + c3,
+    //                               n3 * d0 + n2 * d1 + n * d2 + d3));
+    //                 }
+    //   ofs.close();
+    // }
+    std::string dataset_name = "/spatial_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
+    save_rdm(s4RDM, {n,n,n,n,n,n,n,n}, dataset_name);
+
 
     // SpinRDM
     if (schd.DoSpinRDM) {
@@ -625,6 +635,9 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
       std::ofstream ofs(file, std::ios::binary);
       boost::archive::binary_oarchive save(ofs);
       save << s4RDM;
+
+      std::string dataset_name = "/spin_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
+      save_rdm(fourRDM, {norbs,norbs,norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank

@@ -31,7 +31,7 @@ jobs:
         env:
           EIGEN_ROOT: /usr/include/eigen3
           BOOST_ROOT: /usr/local
-          HDF5_ROOT: /usr/lib/x86_64-linux-gnu/hdf5/serial/
+          HDF5_ROOT: /usr/lib/x86_64-linux-gnu/hdf5/serial
 
       - name: Run Tests
         run: |

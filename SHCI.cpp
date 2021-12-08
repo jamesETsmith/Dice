@@ -279,7 +279,9 @@ int main(int argc, char *argv[]) {
   //
   // Create HDF5 data file (this overwrites existing files with the same name)
   //
-  create_hdf5_datafile("shci_data.h5");
+  if (commrank == 0) {
+    create_hdf5_datafile("shci_data.h5");
+  }
 
   // Unlink the integral shared memory
   boost::interprocess::shared_memory_object::remove(shciint2.c_str());
@@ -525,13 +527,15 @@ int main(int argc, char *argv[]) {
       prevci(m, 0) = 0.0;
     }
 
-    //
-    // Save CI Vectors to HDF5
-    //
-    save_ci_vectors(ci, SHMDets);
-
   } // end root
   pout << std::flush;
+
+  //
+  // Save CI Vectors to HDF5
+  //
+  if (commrank == 0) {
+    save_ci_vectors(ci, SHMDets);
+  }
 
   // #####################################################################
   // RDMs

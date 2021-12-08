@@ -19,11 +19,18 @@ void create_hdf5_datafile(const std::string filename) {
 
     Group spatial_rdm = file.createGroup("/spatial_rdm");
     Group spin_rdm = file.createGroup("/spin_rdm");
+
+    spatial_rdm.close();
+    spin_rdm.close();
+    file.close();
+
   } // end of try block
 
   // catch failure caused by the H5File operations
   catch (FileIException error) {
     error.printErrorStack();
+    std::cerr << "HDF5 CAUGHT A FILE EXCEPTION EXITING..." << std::endl;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -89,19 +96,19 @@ void save_ci_vectors(const std::vector<Eigen::MatrixXx> &ci,
   // catch failure caused by the H5File operations
   catch (FileIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSet operations
   catch (DataSetIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSpace operations
   catch (DataSpaceIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -137,18 +144,18 @@ void save_rdm(const Eigen::MatrixXx &rdm, const std::vector<int> &dimensions,
   // catch failure caused by the H5File operations
   catch (FileIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSet operations
   catch (DataSetIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSpace operations
   catch (DataSpaceIException error) {
     error.printErrorStack();
-    // return -1;
+    exit(EXIT_FAILURE);
   }
 }
