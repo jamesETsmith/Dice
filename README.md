@@ -1,6 +1,12 @@
 [![CI](https://github.com/jamesETsmith/Dice/actions/workflows/ci.yaml/badge.svg)](https://github.com/jamesETsmith/Dice/actions/workflows/ci.yaml)
 <div><img src="https://github.com/sanshar/Dice/blob/master/docs/images/dice_lateral.png" height="360px"/></div>
 
+# Warning
+This fork is instable and subject to breaking changes. Only non-relativistic calculation (i.e. regular Dice rather than zDice) is tested on this fork.
+LCC and MRPT are also likely broken.
+The goal of this for is to test out HDF5 with Dice and other feature, not to refactor the original Dice package.
+
+# General 
 *Dice* implements the semistochastic heat bath configuration interaction (SHCI) algorithm for *ab initio* Hamiltonians of quantum chemical systems.
 
 Unlike full configuration interaction (FCI), SHCI can be used to treat active spaces containing 30 to 100 orbitals.
@@ -17,9 +23,8 @@ Thus if you are interested in performing multireference calculations with active
 *Dice* might be an ideal choice for you.
 
 
-* *Dice* is available with the [PySCF](https://github.com/sunqm/pyscf/blob/master/README.md) package.
+* You can use *Dice* with the [PySCF](https://github.com/sunqm/pyscf/blob/master/README.md) package, see the [shciscf module](https://github.com/jamesETsmith/shciscf/).
 
-* The latest version of *Dice* is also downloadable as a tar archive: [Dice.tar.gz](images/Dice.tar.gz)
 
 Prerequisites
 ------------
@@ -53,6 +58,8 @@ One way of getting and installing the Eigen package is:
   sudo make install
 ```
 
+* [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
+
 * About compiler requirements:
     - GNU: g++ 4.8 or newer
     - Intel: icpc 14.0.1 or newer
@@ -74,6 +81,7 @@ All the lines in the `Makefile` that normally need to be edited are shown below:
   BOOST=/path_to/boost_1_NN_0
 ```
 
+You'll also want to set the env variable `HDF5_ROOT` (if not already set) when compiling to point toward your installation of HDF5.
 
 Testing
 -------
