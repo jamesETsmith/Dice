@@ -16,48 +16,51 @@ cd $here
 cd $here/o2_stoc
 printf "...running o2_stoc\n"
 $MPICOMMAND $HCIPATH > output.dat
-python ../test_energy.py  1.0e-5
-python ../test_twopdm.py spatialRDM.0.0.txt trusted2RDM.txt 1.e-8
+python ../test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=1e-5
+python ../test_twopdm.py --file1=shci_data.h5 --file2=trusted2RDM.txt --tol=1.e-8
 
 cd $here/o2_det
 printf "...running o2_det\n"
 $MPICOMMAND $HCIPATH > output.dat
-python ../test_energy.py  1.0e-6
+python ../test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=1.0e-6
 
 cd $here/o2_det_trev
 printf "...running o2_det_trev\n"
 $MPICOMMAND $HCIPATH > output.dat
-python ../test_energy.py  1.0e-6
+python ../test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=1.0e-6
 
 cd $here/o2_det_trev_direct
 printf "...running o2_det_trev_direct\n"
 $MPICOMMAND $HCIPATH > output.dat
-python ../test_energy.py  1.0e-6
+python ../test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=1.0e-6
 
 
 cd $here/o2_det_direct
 printf "...running o2_det_direct\n"
 $MPICOMMAND $HCIPATH > output.dat
-python ../test_energy.py  1.0e-6
+python ../test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=1.0e-6
 #python ../test_twopdm.py spatialRDM.0.0.txt trusted2RDM.txt 1.e-8
 
 cd $here/restart
 printf "...running restart test\n"
 $MPICOMMAND $HCIPATH input2.dat > output2.dat
 $MPICOMMAND $HCIPATH input3.dat > output3.dat
-python $here/test_energy.py 5e-5
+python $here/test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=5e-5
+
+exit
 
 cd $here/restart_trev
 printf "...running restart test\n"
 $MPICOMMAND $HCIPATH input2.dat > output2.dat
 $MPICOMMAND $HCIPATH input3.dat > output3.dat
-python $here/test_energy.py 5e-5
+python $here/test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=5e-5
 
 cd $here/fullrestart
 printf "...running full restart test\n"
 $MPICOMMAND $HCIPATH input2.dat > output2.dat
 $MPICOMMAND $HCIPATH input3.dat > output3.dat
-python $here/test_energy.py 5e-5
+python $here/test_energy.py --hdf5_file=shci_data.h5 --trusted_energy_file=trusted_hci.e --tol=5e-5
+
 
 cd $here/ref_det
 printf "...running reference determinant tests\n"

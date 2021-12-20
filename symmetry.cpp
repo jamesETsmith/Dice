@@ -24,7 +24,7 @@
 
 #include <Eigen/Dense>
 #include <algorithm>
-#include <boost/bind.hpp>
+// #include <boost/bind.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -40,8 +40,8 @@ using namespace std;
 //
 // Helper Functions
 //
-bool compareForSortingEnergies(const pair<double, int>& a,
-                               const pair<double, int>& b) {
+bool compareForSortingEnergies(const pair<double, int> &a,
+                               const pair<double, int> &b) {
   return a.first < b.first;
 }
 
@@ -68,7 +68,7 @@ int symmetry::convertStringIrrepToInt(string pg, string irrep) {
     pout << "WARNING: Irrep " << irrep << " not supported for point group "
          << pg << endl;
     init_success = false;
-    return -1;  // Failure
+    return -1; // Failure
   }
 
   vector<string>::iterator it = find(irreps.begin(), irreps.end(), irrep);
@@ -83,7 +83,7 @@ int symmetry::convertStringIrrepToInt(string pg, string irrep) {
     }
     pout << endl;
     init_success = false;
-    return -1;  // Failure
+    return -1; // Failure
   }
   // Return the 1-indexed value so it matches the IDs from the FCIDUMP
   return distance(irreps.begin(), it) + 1;
@@ -99,7 +99,7 @@ int symmetry::convertStringIrrepToInt(string pg, string irrep) {
  * @param pg Point group for the molecule in all lower case letters.
  * @param mol_irreps A vector of the irreps for the active space orbitals.
  */
-symmetry::symmetry(string pg, vector<int>& mol_irreps, string targetIrrepStr) {
+symmetry::symmetry(string pg, vector<int> &mol_irreps, string targetIrrepStr) {
   init_pg_irreps();
   // Assign correct product table for point group. Note that even though the
   // indices of the columns are one less than the MOLPRO notation the irrep
@@ -220,7 +220,7 @@ int symmetry::getProduct(int irrep1, int irrep2) {
   return symmetry::product_table(irrep1 - 1, irrep2 - 1);
 }
 
-int symmetry::getProduct(vector<int>& irreps) {  // TODO test this
+int symmetry::getProduct(vector<int> &irreps) { // TODO test this
   // For more than two irreps.
   if (irreps.size() > 2) {
     int irrep = irreps.back();
@@ -245,13 +245,13 @@ int symmetry::getDetSymmetry(Determinant det) {
   return det_irrep;
 }
 
-void symmetry::estimateLowestEnergyDet(int spin, oneInt I1, vector<int>& irrep,
-                                       vector<int>& occupied,
-                                       Determinant& Det) {
+void symmetry::estimateLowestEnergyDet(int spin, oneInt I1, vector<int> &irrep,
+                                       vector<int> &occupied,
+                                       Determinant &Det) {
   // This method is for a single determinant and should be placed inside a
   // loop over all input desired determinants.
 
-  vector<pair<double, int> > sort1Body(0);  // Double: E, int: original idx
+  vector<pair<double, int>> sort1Body(0); // Double: E, int: original idx
 #ifndef Complex
   for (int i = 0; i < I1.norbs; i++) {
     sort1Body.push_back(make_pair(I1(i, i), i));
@@ -282,8 +282,8 @@ void symmetry::estimateLowestEnergyDet(int spin, oneInt I1, vector<int>& irrep,
   if (spin == 0) {
     // If we aren't targetting the totally symmetric irrep
     if (targetIrrep != 1) {
-      nDOElec -= 2;  // Take two electrons and upair them so we can find the
-                     // right irrep
+      nDOElec -= 2; // Take two electrons and upair them so we can find the
+                    // right irrep
       bool found_irrep = false;
       // Find lowest energy orbitals with the appropriate symmetry
       for (int i = 0; i < I1.norbs && !found_irrep; i++) {
@@ -308,7 +308,7 @@ void symmetry::estimateLowestEnergyDet(int spin, oneInt I1, vector<int>& irrep,
       }
 
       if (!found_irrep) {
-        nDOElec += 2;  // Return DO elec
+        nDOElec += 2; // Return DO elec
         for (int i = 0; i < nDOElec; i++) {
           Det.setocc(i, true);
         }

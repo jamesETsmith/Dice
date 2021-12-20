@@ -62,7 +62,7 @@
 #include "symmetry.h"
 MatrixXd symmetry::product_table;
 #include <algorithm>
-#include <boost/bind.hpp>
+// #include <boost/bind.hpp>
 // clang-format on
 
 // Initialize
@@ -424,6 +424,7 @@ int main(int argc, char *argv[]) {
 
   vector<double> E0 = SHCIbasics::DoVariational(
       ci, Dets, schd, I2, I2HBSHM, irrep, I1, coreE, nelec, schd.DoRDM);
+
   Determinant *SHMDets;
   SHMVecFromVecs(Dets, SHMDets, shciDetsCI, DetsCISegment, regionDetsCI);
   int DetsSize = Dets.size();
@@ -482,6 +483,15 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // Save data to HDF5
+  if (commrank == 0) {
+    save_energies("shci_data.h5", "variational_energies", E0);
+    std::cout << "Determinant size comp " << ci[0].size() << " " << DetsSize
+              << std::endl;
+    save_ci_vectors("shci_data.h5", ci);
+    save_determinants("shci_data.h5", SHMDets, DetsSize);
+  }
+
 #ifdef Complex
   // make the largest magnitude ci coefficient real
   for (int root = 0; root < schd.nroots; root++) {
@@ -529,13 +539,6 @@ int main(int argc, char *argv[]) {
 
   } // end root
   pout << std::flush;
-
-  //
-  // Save CI Vectors to HDF5
-  //
-  if (commrank == 0) {
-    save_ci_vectors(ci, SHMDets);
-  }
 
   // #####################################################################
   // RDMs
@@ -626,6 +629,7 @@ int main(int argc, char *argv[]) {
   // #####################################################################
   // PT
   // #####################################################################
+  std::vector<double> total_energies(E0);
   if (schd.doSOC && !schd.stochastic) { // deterministic SOC calculation
     log_pt(schd);
     if (schd.doGtensor) {
@@ -703,8 +707,10 @@ root1, Heff(root1,root1), Heff(root2, root2), Heff(root1, root2), spinRDM);
           coreE, nelec, root, vdVector, Psi1Norm);
       ePT += E0[root];
       // pout << "Writing energy " << ePT << "  to file: " << efile << endl;
-      if (commrank == 0)
+      if (commrank == 0) {
         fwrite(&ePT, 1, sizeof(double), f);
+        total_energies[root] = ePT;
+      }
     }
     fclose(f);
   } else if (schd.SampleN != -1 && schd.singleList) {
@@ -724,10 +730,13 @@ root1, Heff(root1,root1), Heff(root2, root2), Heff(root1, root2), spinRDM);
         ePT[root] += E0[root];
         // pout << "Writing energy " << E0[root] << "  to file: " << efile <<
         // endl;
-        if (commrank == 0)
+        if (commrank == 0) {
           fwrite(&ePT[root], 1, sizeof(double), f);
+        }
       }
       fclose(f);
+
+      total_energies = ePT;
 
       if (schd.doSOC) {
         for (int j = 0; j < E0.size(); j++)
@@ -741,6 +750,10 @@ root1, Heff(root1,root1), Heff(root2, root2), Heff(root1, root2), spinRDM);
 #endif
     pout << "Error here" << endl;
     exit(0);
+  }
+
+  if (commrank == 0) {
+    save_energies("shci_data.h5", "total_energies", total_energies);
   }
 
   // THIS IS USED FOR RDM CALCULATION FOR DETERMINISTIC PT
@@ -792,111 +805,114 @@ root1, Heff(root1,root1), Heff(root2, root2), Heff(root1, root2), spinRDM);
     // s2RDM);
   } // end if doResponse||DoRDM && RdmType && !stochastic...
 
-  // #####################################################################
-  // Extrapolate
-  // #####################################################################
-  if (schd.extrapolate) { // performing extrapolation
-    if (schd.nroots > 1) {
-      pout << " extrapolation only supported for single root " << endl;
-      exit(0);
-    }
-    for (int root = 0; root < schd.nroots; root++) {
-      vector<double> var(4, 0.0), PT(4, 0.0);
-      vector<int> nDets(4, 0);
-      nDets[0] = DetsSize;
-      var[0] = E0[0];
-      std::string efile;
-      efile = str(boost::format("%s%s") % schd.prefix[0].c_str() % "/shci.e");
-      FILE *f = fopen(efile.c_str(), "rb");
-      if (commrank == 0)
-        fread(&PT[0], 1, sizeof(double), f);
-#ifndef SERIAL
-      mpi::broadcast(world, PT, 0);
-#endif
-      PT[0] -= var[0];
+  if (schd.extrapolate) {
+    std::cerr << "ERROR: Extrapolate option is no longer supported!!"
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  //   if (schd.extrapolate) { // performing extrapolation
+  //     if (schd.nroots > 1) {
+  //       pout << " extrapolation only supported for single root " << endl;
+  //       exit(0);
+  //     }
+  //     for (int root = 0; root < schd.nroots; root++) {
+  //       vector<double> var(4, 0.0), PT(4, 0.0);
+  //       vector<int> nDets(4, 0);
+  //       nDets[0] = DetsSize;
+  //       var[0] = E0[0];
+  //       std::string efile;
+  //       efile = str(boost::format("%s%s") % schd.prefix[0].c_str() %
+  //       "/shci.e"); FILE *f = fopen(efile.c_str(), "rb"); if (commrank == 0)
+  //         fread(&PT[0], 1, sizeof(double), f);
+  // #ifndef SERIAL
+  //       mpi::broadcast(world, PT, 0);
+  // #endif
+  //       PT[0] -= var[0];
 
-      // do 4 iterations for extrapolation
-      for (int iter = 0; iter < 3; iter++) {
-        if (commrank == 0) {
-          char file[5000];
-          sprintf(file, "%s/%d-variational.bkp", schd.prefix[0].c_str(),
-                  commrank);
-          std::ifstream ifs(file, std::ios::binary);
-          boost::archive::binary_iarchive load(ifs);
-          ci.clear();
-          Dets.clear();
-          int niter;
-          load >> niter >> Dets;
-          load >> ci;
-          if (iter == 0)
-            nDets[0] = Dets.size();
-          DetsSize = Dets.size();
-        }
-        SHMVecFromVecs(Dets, SHMDets, shciDetsCI, DetsCISegment, regionDetsCI);
-        if (commrank == 0) {
-          std::vector<size_t> indices(DetsSize);
-          for (int i = 0; i < DetsSize; i++)
-            indices[i] = i;
+  //       // do 4 iterations for extrapolation
+  //       for (int iter = 0; iter < 3; iter++) {
+  //         if (commrank == 0) {
+  //           char file[5000];
+  //           sprintf(file, "%s/%d-variational.bkp", schd.prefix[0].c_str(),
+  //                   commrank);
+  //           std::ifstream ifs(file, std::ios::binary);
+  //           boost::archive::binary_iarchive load(ifs);
+  //           ci.clear();
+  //           Dets.clear();
+  //           int niter;
+  //           load >> niter >> Dets;
+  //           load >> ci;
+  //           if (iter == 0)
+  //             nDets[0] = Dets.size();
+  //           DetsSize = Dets.size();
+  //         }
+  //         SHMVecFromVecs(Dets, SHMDets, shciDetsCI, DetsCISegment,
+  //         regionDetsCI); if (commrank == 0) {
+  //           std::vector<size_t> indices(DetsSize);
+  //           for (int i = 0; i < DetsSize; i++)
+  //             indices[i] = i;
 
-          sort(indices.begin(), indices.end(), [&ci](size_t i1, size_t i2) {
-            return abs(ci[0](i1, 0)) > abs(ci[0](i2, 0));
-          });
+  //           sort(indices.begin(), indices.end(), [&ci](size_t i1, size_t i2)
+  //           {
+  //             return abs(ci[0](i1, 0)) > abs(ci[0](i2, 0));
+  //           });
 
-          DetsSize = DetsSize * schd.extrapolationFactor;
-          Dets.resize(DetsSize);
-          MatrixXx cicopy = MatrixXx::Zero(DetsSize, 1);
-          for (size_t i = 0; i < DetsSize; i++) {
-            Dets[i] = SHMDets[indices[i]];
-            cicopy(i, 0) = ci[root](indices[i], 0);
-          }
-          ci[root].resize(DetsSize, 1);
-          for (size_t i = 0; i < DetsSize; i++) {
-            ci[root](i, 0) = cicopy(i, 0);
-          }
-          ci[root] = ci[root] / ci[root].norm();
-        }
+  //           DetsSize = DetsSize * schd.extrapolationFactor;
+  //           Dets.resize(DetsSize);
+  //           MatrixXx cicopy = MatrixXx::Zero(DetsSize, 1);
+  //           for (size_t i = 0; i < DetsSize; i++) {
+  //             Dets[i] = SHMDets[indices[i]];
+  //             cicopy(i, 0) = ci[root](indices[i], 0);
+  //           }
+  //           ci[root].resize(DetsSize, 1);
+  //           for (size_t i = 0; i < DetsSize; i++) {
+  //             ci[root](i, 0) = cicopy(i, 0);
+  //           }
+  //           ci[root] = ci[root] / ci[root].norm();
+  //         }
 
-#ifndef SERIAL
-        mpi::broadcast(world, DetsSize, 0);
-#endif
-        nDets[iter + 1] = DetsSize;
-        schd.epsilon1.resize(1);
-        schd.epsilon1[0] = 1.e10; // very large
-        schd.restart = false;
-        schd.fullrestart = false;
-        schd.DoRDM = false;
-        E0 = SHCIbasics::DoVariational(ci, Dets, schd, I2, I2HBSHM, irrep, I1,
-                                       coreE, nelec, false);
-        var[iter + 1] = E0[0];
+  // #ifndef SERIAL
+  //         mpi::broadcast(world, DetsSize, 0);
+  // #endif
+  //         nDets[iter + 1] = DetsSize;
+  //         schd.epsilon1.resize(1);
+  //         schd.epsilon1[0] = 1.e10; // very large
+  //         schd.restart = false;
+  //         schd.fullrestart = false;
+  //         schd.DoRDM = false;
+  //         E0 = SHCIbasics::DoVariational(ci, Dets, schd, I2, I2HBSHM, irrep,
+  //         I1,
+  //                                        coreE, nelec, false);
+  //         var[iter + 1] = E0[0];
 
-        DetsSize = Dets.size();
-#ifndef SERIAL
-        mpi::broadcast(world, DetsSize, 0);
-#endif
-        SHMVecFromVecs(Dets, SHMDets, shciDetsCI, DetsCISegment, regionDetsCI);
-        Dets.clear();
+  //         DetsSize = Dets.size();
+  // #ifndef SERIAL
+  //         mpi::broadcast(world, DetsSize, 0);
+  // #endif
+  //         SHMVecFromVecs(Dets, SHMDets, shciDetsCI, DetsCISegment,
+  //         regionDetsCI); Dets.clear();
 
-        CItype *ciroot;
-        SHMVecFromMatrix(ci[root], ciroot, shcicMax, cMaxSegment, regioncMax);
-        if (!schd.stochastic)
-          PT[iter + 1] = SHCIbasics::DoPerturbativeDeterministic(
-              SHMDets, ciroot, DetsSize, E0[root], I1, I2, I2HBSHM, irrep, schd,
-              coreE, nelec, root, vdVector, Psi1Norm);
-        else
-          PT[iter + 1] = SHCIbasics::
-              DoPerturbativeStochastic2SingleListDoubleEpsilon2AllTogether(
-                  SHMDets, ciroot, DetsSize, E0[root], I1, I2, I2HBSHM, irrep,
-                  schd, coreE, nelec, root);
-      } // end iter
+  //         CItype *ciroot;
+  //         SHMVecFromMatrix(ci[root], ciroot, shcicMax, cMaxSegment,
+  //         regioncMax); if (!schd.stochastic)
+  //           PT[iter + 1] = SHCIbasics::DoPerturbativeDeterministic(
+  //               SHMDets, ciroot, DetsSize, E0[root], I1, I2, I2HBSHM, irrep,
+  //               schd, coreE, nelec, root, vdVector, Psi1Norm);
+  //         else
+  //           PT[iter + 1] = SHCIbasics::
+  //               DoPerturbativeStochastic2SingleListDoubleEpsilon2AllTogether(
+  //                   SHMDets, ciroot, DetsSize, E0[root], I1, I2, I2HBSHM,
+  //                   irrep, schd, coreE, nelec, root);
+  //       } // end iter
 
-      if (commrank == 0)
-        printf("Ndet         Evar                  Ept               \n");
-      for (int iter = 0; iter < 4; iter++)
-        if (commrank == 0)
-          printf("%10i   %18.10g    %18.10g \n", nDets[iter], var[iter],
-                 PT[iter]);
-    } // end root
-  }   // end extrapolate
+  //       if (commrank == 0)
+  //         printf("Ndet         Evar                  Ept               \n");
+  //       for (int iter = 0; iter < 4; iter++)
+  //         if (commrank == 0)
+  //           printf("%10i   %18.10g    %18.10g \n", nDets[iter], var[iter],
+  //                  PT[iter]);
+  //     } // end root
+  //   }   // end extrapolate
 
 #ifndef SERIAL
   world.barrier();

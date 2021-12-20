@@ -379,11 +379,11 @@ void SHCIrdm::save1RDM(schedule &schd, MatrixXx &s1RDM, MatrixXx &oneRDM,
 
   if (commrank == 0) {
       std::string dataset_name = "/spatial_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(s1RDM, {nSpatOrbs, nSpatOrbs}, dataset_name);
+      save_rdm("shci_data.h5", s1RDM, {nSpatOrbs, nSpatOrbs}, dataset_name);
 
     if (schd.DoSpinOneRDM) {
       std::string dataset_name = "/spin_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(oneRDM, {norbs, norbs}, dataset_name);
+      save_rdm("shci_data.h5", oneRDM, {norbs, norbs}, dataset_name);
     }
   }  // end if commrank
 }
@@ -475,7 +475,7 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
   if (commrank == 0) {
     {
       std::string dataset_name = "/spatial_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(s2RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
+      save_rdm("shci_data.h5", s2RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
     }
 
     if (schd.DoSpinRDM) {
@@ -492,7 +492,7 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
       const int norbs = 2 * nSpatOrbs;
       const int n_pairs = norbs*(norbs+1)/2;
       std::string dataset_name = "/spin_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(twoRDM, {n_pairs, n_pairs}, dataset_name);
+      save_rdm("shci_data.h5", twoRDM, {n_pairs, n_pairs}, dataset_name);
 
     }
 
@@ -542,7 +542,7 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
     //   ofs.close();
     // }
     std::string dataset_name = "/spatial_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
-    save_rdm(s3RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
+    save_rdm("shci_data.h5", s3RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
 
 
     // BIN
@@ -569,7 +569,7 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
 
       //
       std::string dataset_name = "/spin_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(threeRDM, {norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
+      save_rdm("shci_data.h5", threeRDM, {norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank
@@ -611,7 +611,7 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
     //   ofs.close();
     // }
     std::string dataset_name = "/spatial_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
-    save_rdm(s4RDM, {n,n,n,n,n,n,n,n}, dataset_name);
+    save_rdm("shci_data.h5", s4RDM, {n,n,n,n,n,n,n,n}, dataset_name);
 
 
     // SpinRDM
@@ -637,7 +637,7 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
       save << s4RDM;
 
       std::string dataset_name = "/spin_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm(fourRDM, {norbs,norbs,norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
+      save_rdm("shci_data.h5", fourRDM, {norbs,norbs,norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank

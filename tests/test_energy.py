@@ -1,27 +1,19 @@
 #!/usr/bin/python
 
-import os
-from math import sqrt
-import numpy as N
 import struct
+import h5py
 
 
-def run(args):
+def run_test(shci_hdf5_file: str, trusted_energy_file: str, tol: float):
+    # Calculated
+    f = h5py.File(shci_hdf5_file, "r")
+    calc_e = f["total_energies"][0]
 
-    if len(args) != 2 and len(args) != 3:
-        raise AssertionError("Wrong number of CLI arguments.")
-
-    trusted_energy_file = "trusted_hci.e"
-    if len(args) == 3:
-        trusted_energy_file = args[2]
-
-    file1 = open("shci.e", "rb")
+    # Trusted
     file2 = open(trusted_energy_file, "rb")
-
-    tol = float(args[1])
-
-    calc_e = struct.unpack("d", file1.read(8))[0]
     given_e = struct.unpack("d", file2.read(8))[0]
+
+    # Comparison
     if abs(given_e - calc_e) > tol:
         print("\t", given_e, "-", calc_e, " > ", tol)
         print("\t\033[91mFailed\033[00m Energy Test....")
@@ -30,6 +22,15 @@ def run(args):
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    run(sys.argv)
+    # Read in command line args
+    # fmt: off
+    parser = argparse.ArgumentParser(description="Compare SHCI energy to a known value")
+    parser.add_argument("--hdf5_file", help="SHCI HDF5 data file.", type=str, required=True)
+    parser.add_argument("--trusted_energy_file", help="Trusted SHCI energy as a binary file.", type=str, required=True)
+    parser.add_argument("--tol", help="Absolute tolerance when comparing energies", type=float, required=True)
+    args = parser.parse_args()
+    # fmt: on
+
+    run_test(args.hdf5_file, args.trusted_energy_file, args.tol)

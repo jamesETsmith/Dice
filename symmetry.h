@@ -25,7 +25,7 @@
 
 #include <Eigen/Dense>
 #include <algorithm>
-#include <boost/bind.hpp>
+// #include <boost/bind.hpp>
 #include <iostream>
 #include <map>
 #include <string>
@@ -40,11 +40,11 @@ using namespace std;
 
 class oneInt;
 
-bool compareForSortingEnergies(const pair<double, int>& a,
-                               const pair<double, int>& b);
+bool compareForSortingEnergies(const pair<double, int> &a,
+                               const pair<double, int> &b);
 
 class symmetry {
- private:
+private:
   // Full table for d2h and all subgroups
   MatrixXd fullD2hTable;
 
@@ -59,25 +59,25 @@ class symmetry {
     pg_irreps["c1"] = {"A"};
   };
 
- public:
-  bool init_success;  // Basically, are we going to search for the lowest energy
-                      // determinant, by irrep and spin
-  static MatrixXd product_table;  // product table for a given symmetry
-  string pointGroup;              // eg. d2h, c2
-  int targetIrrep;                // Numerical code for target irrep
-  string targetIrrepString;       // String code for the target irrep
+public:
+  bool init_success; // Basically, are we going to search for the lowest energy
+                     // determinant, by irrep and spin
+  static MatrixXd product_table; // product table for a given symmetry
+  string pointGroup;             // eg. d2h, c2
+  int targetIrrep;               // Numerical code for target irrep
+  string targetIrrepString;      // String code for the target irrep
   vector<int> moIrreps;
 
-  symmetry(string pointGroup, vector<int>& mol_irreps,
-           string targetIrrepStr);  // product and sym is initialized
+  symmetry(string pointGroup, vector<int> &mol_irreps,
+           string targetIrrepStr); // product and sym is initialized
   int getProduct(int, int);
-  int getProduct(vector<int>&);
+  int getProduct(vector<int> &);
   int getDetSymmetry(Determinant det);
-  void estimateLowestEnergyDet(int spin, oneInt I1, vector<int>& irrep,
-                               vector<int>& occupied, Determinant& Det);
+  void estimateLowestEnergyDet(int spin, oneInt I1, vector<int> &irrep,
+                               vector<int> &occupied, Determinant &Det);
   int convertStringIrrepToInt(string pg, string irrep);
 
-  void checkTargetStates(vector<Determinant>& Dets, int spin) {
+  void checkTargetStates(vector<Determinant> &Dets, int spin) {
     // Check HF dets to see if they all have the same irrep and spin.
     int spin_det0 = Dets[0].Nalpha() - Dets[0].Nbeta();
     int irrep_det0 = getDetSymmetry(Dets[0]);

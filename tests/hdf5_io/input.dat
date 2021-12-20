@@ -14,7 +14,7 @@ dE 1e-12
 maxiter 6
 
 #pt
-nPTiter 0
+nPTiter 10
 epsilon2 1e-07
 epsilon2Large 1000
 targetError 0.0001
