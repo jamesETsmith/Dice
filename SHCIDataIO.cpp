@@ -102,10 +102,9 @@ void save_determinants(const std::string filename, Determinant *Dets,
   // Copy data to C-style arrays before handing off to HDF5
   int norbs = Dets[0].norbs;
   char dets_data[n_dets][norbs];
-  std::cout << "My norbs " << norbs << " Determinant norbs "
-            << Determinant::norbs << std::endl;
 
-  // std::vector<char> dets_data(n_dets * norbs);
+  // Loop over all determinants (could do this in parallel, but it shouldn't be
+  // a bottleneck)
   for (size_t i = 0; i < n_dets; i++) {
     Determinant D_i = Dets[i];
     char occupation_vec[norbs];

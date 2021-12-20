@@ -33,7 +33,7 @@ enum davidsonType { DIRECT, DISK, MEMORY };
 enum rdmType { RELAXED, UNRELAXED };
 
 struct schedule {
- private:
+private:
   friend class boost::serialization::access;
   template <class Archive>
   // clang-format off
@@ -99,6 +99,7 @@ struct schedule {
     & DoOneRDM                                \
     & DoThreeRDM                              \
     & DoFourRDM                               \
+    & hdf5_file                               \
     & restrictionsV                           \
     & restrictionsPT                          \
     & Bvalue                                  \
@@ -106,7 +107,7 @@ struct schedule {
   }
   // clang-format on
 
- public:
+public:
   double davidsonTol;
   double davidsonTolLoose;
   rdmType RdmType;
@@ -167,14 +168,15 @@ struct schedule {
   bool DoOneRDM;
   bool DoThreeRDM;
   bool DoFourRDM;
+  string hdf5_file;
 
-  //RAS calculations
+  // RAS calculations
   vector<OccRestrictions> restrictionsV;
   vector<OccRestrictions> restrictionsPT;
 
-  //apply external magnetic field
-  double Bvalue;  //magnitude of magnetic field
-  vector<double> Bdirection; //direction e.g. 1 0 0 mean it is along x-axis
+  // apply external magnetic field
+  double Bvalue;             // magnitude of magnetic field
+  vector<double> Bdirection; // direction e.g. 1 0 0 mean it is along x-axis
 };
 
 #endif

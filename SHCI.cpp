@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
   // Create HDF5 data file (this overwrites existing files with the same name)
   //
   if (commrank == 0) {
-    create_hdf5_datafile("shci_data.h5");
+    create_hdf5_datafile(schd.hdf5_file);
   }
 
   // Unlink the integral shared memory
@@ -485,11 +485,11 @@ int main(int argc, char *argv[]) {
 
   // Save data to HDF5
   if (commrank == 0) {
-    save_energies("shci_data.h5", "variational_energies", E0);
-    std::cout << "Determinant size comp " << ci[0].size() << " " << DetsSize
-              << std::endl;
-    save_ci_vectors("shci_data.h5", ci);
-    save_determinants("shci_data.h5", SHMDets, DetsSize);
+    save_energies(schd.hdf5_file, "variational_energies", E0);
+    save_ci_vectors(schd.hdf5_file, ci);
+    save_determinants(schd.hdf5_file, SHMDets, DetsSize);
+    pout << format("\nSaved variational results to %s  %12.2f (s)\n\n") %
+                schd.hdf5_file % (getTime() - startofCalc);
   }
 
 #ifdef Complex
@@ -753,7 +753,9 @@ root1, Heff(root1,root1), Heff(root2, root2), Heff(root1, root2), spinRDM);
   }
 
   if (commrank == 0) {
-    save_energies("shci_data.h5", "total_energies", total_energies);
+    save_energies(schd.hdf5_file, "total_energies", total_energies);
+    pout << format("\nSaved total energies to %s  %12.2f (s)\n\n") %
+                schd.hdf5_file % (getTime() - startofCalc);
   }
 
   // THIS IS USED FOR RDM CALCULATION FOR DETERMINISTIC PT

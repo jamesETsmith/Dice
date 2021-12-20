@@ -1,24 +1,23 @@
 #!/usr/bin/python
 
 import numpy as np
-from rdm_utilities import read_Dice1RDM, read_Dice_spin_1RDM
+import h5py
 
 
-def test_spin_1RDM(spinRDM_file: str, spatialRDM_file: str, tol: float):
+def test_spin_rdm(shci_data_file:str, tol: float):
     """Trace spin1RDM and compare to spatial 1RDM.
 
     Parameters
     ----------
-    spinRDM_file : str
-        RDM file from Dice (.txt).
-    spatialRDM_file : str
-        RDM file from Dice (.txt).
+    shci_data_file : str
+        HDF5 file from Dice containing RDMs.
     tol : float
         Tolerance for L2 error.
     """
+    f = h5py.File(shci_data_file, "r")
 
-    spinRDM = read_Dice_spin_1RDM(spinRDM_file)
-    spatialRDM = read_Dice1RDM(spatialRDM_file)
+    spatialRDM = np.asarray(f["spatial_rdm/1RDM_0_0"])
+    spinRDM = np.asarray(f["spin_rdm/1RDM_0_0"])
 
     # Trace over spin
     test_spatial = np.zeros_like(spatialRDM)
@@ -48,6 +47,14 @@ def test_spin_1RDM(spinRDM_file: str, spatialRDM_file: str, tol: float):
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    test_spin_1RDM(sys.argv[1], sys.argv[2], float(sys.argv[3]))
+    # Read in command line args
+    # fmt: off
+    parser = argparse.ArgumentParser(description="Compare spatial and spin RDMs")
+    parser.add_argument("--shci_data_file", help="HDF5 data file from Dice", type=str, required=True)
+    parser.add_argument("--rtol", help="Relative tolerance when comparing relative L-2 norm", type=float, required=True)
+    args = parser.parse_args()
+    # fmt: on
+
+    test_spin_rdm(args.shci_data_file, args.rtol)

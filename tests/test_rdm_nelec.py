@@ -1,31 +1,24 @@
 #!/usr/bin/python
 
 import numpy as np
-from rdm_utilities import (
-    read_Dice_spin_1RDM,
-    read_Dice1RDM,
-    read_Dice2RDM,
-    read_Dice3RDM,
-)
+import h5py
 
-
-def test_RDM_nelec(
-    FCIDUMP_file: str,
-    spatial1RDM_file: str,
-    spatial2RDM_file: str,
-    spatial3RDM_file: str,
-    tol: float,
+def test_rdm_nelec(
+    shci_data_file: str,
+    fcidump_file: str,
+    tol: float
 ):
 
     # Get Nelec from FCIDUMP
-    with open(FCIDUMP_file, "r") as f:
+    with open(fcidump_file, "r") as f:
         line = f.readline()
         nelec = int(line.split(",")[1].split("=")[1])
 
     # Get RDMs
-    oneRDM = read_Dice1RDM(spatial1RDM_file)
-    twoRDM = read_Dice2RDM(spatial2RDM_file)
-    threeRDM = read_Dice3RDM(spatial3RDM_file)
+    f = h5py.File(shci_data_file, "r")
+    oneRDM =   np.asarray(f["spatial_rdm/1RDM_0_0"])
+    twoRDM =   np.asarray(f["spatial_rdm/2RDM_0_0"])
+    threeRDM = np.asarray(f["spatial_rdm/3RDM_0_0"]).transpose(0,1,2,5,4,3)
 
     # Check that the shapes match
     norb = oneRDM.shape[0]
@@ -86,12 +79,15 @@ def test_RDM_nelec(
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    test_RDM_nelec(
-        sys.argv[1],  # FCIDUMP
-        sys.argv[2],  # spatial1RDM
-        sys.argv[3],  # spatial2RDM
-        sys.argv[4],  # spatial3RDM
-        float(sys.argv[5]),  # Tol
-    )
+    # Read in command line args
+    # fmt: off
+    parser = argparse.ArgumentParser(description="Compare spatial RDMs")
+    parser.add_argument("--shci_data_file", help="HDF5 file from Dice", type=str, required=True)
+    parser.add_argument("--fcidump", help="FCIDUMP from PySCF/MOLPRO", type=str, required=True)
+    parser.add_argument("--tol", help="Absolute tolerance when comparing electrons from RDMs", type=float, required=True)
+    args = parser.parse_args()
+    # fmt: on
+
+    test_rdm_nelec(args.shci_data_file, args.fcidump, args.tol)

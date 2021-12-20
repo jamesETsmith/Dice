@@ -22,7 +22,7 @@ jobs:
           apt-cache policy libboost-mpi-dev
           sudo apt-get install -y libboost-mpi-dev libboost-serialization-dev
           sudo apt-get install -y libhdf5-dev
-          python -m pip install numpy pandas
+          python -m pip install numpy pandas h5py
 
 
       - name: Compile

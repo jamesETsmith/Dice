@@ -18,6 +18,7 @@
   You should have received a copy of the GNU General Public License along with
   this program. If not, see <http://www.gnu.org/licenses/>.
 */
+// clang-format off
 #include "input.h"
 
 #include <boost/algorithm/string.hpp>
@@ -108,6 +109,8 @@ void readInput(string input, std::vector<std::vector<int> >& occupied,
   schd.DoOneRDM = false;
   schd.DoThreeRDM = false;
   schd.DoFourRDM = false;
+
+  schd.hdf5_file = "shci_data.h5";
 
   schd.Bvalue = 0;
   schd.Bdirection.resize(0);
@@ -323,6 +326,8 @@ void readInput(string input, std::vector<std::vector<int> >& occupied,
       schd.DoThreeRDM = true;
     else if (boost::iequals(ArgName, "DoFourRDM"))
       schd.DoFourRDM = true;
+    else if (boost::iequals(ArgName, "hdf5_file"))
+      schd.hdf5_file = tok[1];
     else if (boost::iequals(ArgName, "schedule")) {
       std::getline(dump, Line);
       cout << Line << endl;
