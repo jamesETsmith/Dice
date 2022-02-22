@@ -1,0 +1,33 @@
+#system
+nocc 40
+0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 
+end
+orbitals ../integrals/FCIDUMP_1_A_DZ_40e_40o_eps1=7.5e-05
+nroots 1
+
+#variational
+schedule 
+0	7.5e-05
+9	7.5e-05
+15	7.5e-05
+end
+davidsonTol 5e-05
+dE 1e-08
+maxiter 21
+
+#pt
+nPTiter 0
+epsilon2 1e-07
+epsilon2Large 1000
+targetError 0.0001
+sampleN 200
+
+#misc
+io 
+prefix /tmp/
+hdf5_file /mnt/ceph/users/jsmith/apps/pull_requests/Dice/shci_data.h5
+DoOneRDM
+DoSpinOneRDM
+DoSpinRDM
+DoRDM
+

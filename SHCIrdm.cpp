@@ -379,11 +379,11 @@ void SHCIrdm::save1RDM(schedule &schd, MatrixXx &s1RDM, MatrixXx &oneRDM,
 
   if (commrank == 0) {
       std::string dataset_name = "/spatial_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", s1RDM, {nSpatOrbs, nSpatOrbs}, dataset_name);
+      save_rdm(schd.hdf5_file, s1RDM, {nSpatOrbs, nSpatOrbs}, dataset_name);
 
     if (schd.DoSpinOneRDM) {
       std::string dataset_name = "/spin_rdm/1RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", oneRDM, {norbs, norbs}, dataset_name);
+      save_rdm(schd.hdf5_file, oneRDM, {norbs, norbs}, dataset_name);
     }
   }  // end if commrank
 }
@@ -475,7 +475,7 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
   if (commrank == 0) {
     {
       std::string dataset_name = "/spatial_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", s2RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
+      save_rdm(schd.hdf5_file, s2RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
     }
 
     if (schd.DoSpinRDM) {
@@ -490,9 +490,23 @@ void SHCIrdm::saveRDM(schedule &schd, MatrixXx &s2RDM, MatrixXx &twoRDM,
 
 
       const int norbs = 2 * nSpatOrbs;
-      const int n_pairs = norbs*(norbs+1)/2;
       std::string dataset_name = "/spin_rdm/2RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", twoRDM, {n_pairs, n_pairs}, dataset_name);
+
+      // Unfold spin 2RDM
+      MatrixXx unfolded_spin_2rdm(norbs*norbs, norbs*norbs);
+      for (int p = 0; p < norbs; p++)
+        for (int q = 0; q < norbs; q++)
+          for (int r = 0; r < norbs; r++)
+            for (int s = 0; s < norbs; s++) {
+              int P = max(p, q), Q = min(p, q);
+              int R = max(r, s), S = min(r, s);
+              double sgn = 1.;
+              if (P != p) sgn *= -1;
+              if (R != r) sgn *= -1;
+              unfolded_spin_2rdm(p*norbs+q, r*norbs+s)= sgn * twoRDM(P * (P + 1) / 2 + Q, R * (R + 1) / 2 + S);
+            }
+        pout << "Finished unfolding spin 2-RDM " << (getTime()-startofCalc) << std::endl;
+      save_rdm(schd.hdf5_file, unfolded_spin_2rdm, {norbs, norbs, norbs, norbs}, dataset_name);
 
     }
 
@@ -542,7 +556,7 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
     //   ofs.close();
     // }
     std::string dataset_name = "/spatial_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
-    save_rdm("shci_data.h5", s3RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
+    save_rdm(schd.hdf5_file, s3RDM, {nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs,nSpatOrbs}, dataset_name);
 
 
     // BIN
@@ -569,7 +583,7 @@ void SHCIrdm::save3RDM(schedule &schd, MatrixXx &threeRDM, MatrixXx &s3RDM,
 
       //
       std::string dataset_name = "/spin_rdm/3RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", threeRDM, {norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
+      save_rdm(schd.hdf5_file, threeRDM, {norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank
@@ -611,7 +625,7 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
     //   ofs.close();
     // }
     std::string dataset_name = "/spatial_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
-    save_rdm("shci_data.h5", s4RDM, {n,n,n,n,n,n,n,n}, dataset_name);
+    save_rdm(schd.hdf5_file, s4RDM, {n,n,n,n,n,n,n,n}, dataset_name);
 
 
     // SpinRDM
@@ -637,7 +651,7 @@ void SHCIrdm::save4RDM(schedule &schd, MatrixXx &fourRDM, MatrixXx &s4RDM,
       save << s4RDM;
 
       std::string dataset_name = "/spin_rdm/4RDM_" + std::to_string(root) + "_" + std::to_string(root);
-      save_rdm("shci_data.h5", fourRDM, {norbs,norbs,norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
+      save_rdm(schd.hdf5_file, fourRDM, {norbs,norbs,norbs,norbs,norbs,norbs,norbs,norbs}, dataset_name);
     }
 
   }  // commrank
