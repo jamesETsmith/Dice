@@ -12,7 +12,7 @@ schedule
 15	7.5e-05
 end
 davidsonTol 5e-05
-dE 1e-08
+dE 1e-06
 maxiter 21
 
 #pt
@@ -26,6 +26,7 @@ sampleN 200
 io 
 prefix /tmp/
 hdf5_file /mnt/ceph/users/jsmith/apps/pull_requests/Dice/shci_data.h5
+#fullrestart
 DoOneRDM
 DoSpinOneRDM
 DoSpinRDM

@@ -52,10 +52,10 @@ void save_ci_vectors(const std::string filename,
   // }
   // std::vector<std::vector<double>> data(n_roots,
   //                                       std::vector<double>(n_dets, 0.0));
-  double data[n_roots][n_dets];
+  // double data[n_roots][n_dets];
+  double *data = (double *)malloc(n_roots * n_dets);
   for (int i = 0; i < n_roots; i++) {
-    std::copy(ci[i].data(), ci[i].data() + n_dets,
-              &data[0][0] + n_roots * n_dets);
+    std::copy(ci[i].data(), ci[i].data() + n_dets, data + n_roots * n_dets);
   }
 
   // Try block to detect exceptions raised by any of the calls inside it
@@ -87,20 +87,27 @@ void save_ci_vectors(const std::string filename,
   // catch failure caused by the H5File operations
   catch (FileIException error) {
     error.printErrorStack();
+    std::cerr << "FIleIException ERROR" << std::endl;
+    std::cerr << error.getDetailMsg() << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSet operations
   catch (DataSetIException error) {
     error.printErrorStack();
+    std::cerr << "DataSetIException ERROR" << std::endl;
+    std::cerr << error.getDetailMsg() << std::endl;
     exit(EXIT_FAILURE);
   }
 
   // catch failure caused by the DataSpace operations
   catch (DataSpaceIException error) {
     error.printErrorStack();
+    std::cerr << "DataSpaceIException ERROR" << std::endl;
+    std::cerr << error.getDetailMsg() << std::endl;
     exit(EXIT_FAILURE);
   }
+  free(data);
 }
 
 void save_determinants(const std::string filename, Determinant *Dets,
@@ -110,17 +117,19 @@ void save_determinants(const std::string filename, Determinant *Dets,
 
   // Copy data to C-style arrays before handing off to HDF5
   int norbs = Dets[0].norbs;
-  int dets_data[n_dets][norbs];
-  // std::vector<std::vector<int>> dets_data(n_dets, std::vector<int>(norbs,
+  char *data = (char *)malloc(n_dets * norbs);
+  // std::vector<std::vector<int>> data(n_dets, std::vector<int>(norbs,
   // 0));
 
   // Loop over all determinants (could do this in parallel, but it shouldn't be
   // a bottleneck)
+  // char occupation_vec[norbs];
   for (size_t i = 0; i < n_dets; i++) {
-    char occupation_vec[norbs];
-    Dets[i].getRepArray(occupation_vec);
-    std::copy(occupation_vec, occupation_vec + norbs,
-              &dets_data[0][0] + i * norbs);
+    for (size_t j = 0; j < norbs; j++) {
+      data[i * norbs + j] = Dets[i].getocc(j);
+    }
+    // Dets[i].getRepArray(occupation_vec);
+    // std::copy(occupation_vec, occupation_vec + norbs, data + i * norbs);
   }
 
   // Try block to detect exceptions raised by any of the calls inside it
@@ -148,8 +157,8 @@ void save_determinants(const std::string filename, Determinant *Dets,
     prop.setChunk(2, chunk_dims);
 
     DataSet determinants = file.createDataSet(
-        DET_DATASET_NAME, PredType::NATIVE_INT, det_dataspace, prop);
-    determinants.write(dets_data, PredType::NATIVE_INT);
+        DET_DATASET_NAME, PredType::NATIVE_CHAR, det_dataspace, prop);
+    determinants.write(data, PredType::NATIVE_CHAR);
 
   } // end of try block
 
@@ -176,6 +185,7 @@ void save_determinants(const std::string filename, Determinant *Dets,
     std::cerr << error.getDetailMsg() << std::endl;
     exit(EXIT_FAILURE);
   }
+  free(data);
 }
 
 void save_rdm(const std::string filename, const Eigen::MatrixXx &rdm,

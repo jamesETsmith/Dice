@@ -486,10 +486,17 @@ int main(int argc, char *argv[]) {
   // Save data to HDF5
   if (commrank == 0) {
     save_energies(schd.hdf5_file, "variational_energies", E0);
-    save_ci_vectors(schd.hdf5_file, ci);
-    save_determinants(schd.hdf5_file, SHMDets, DetsSize);
-    pout << format("\nSaved variational results to %s  %12.2f (s)\n\n") %
-                schd.hdf5_file % (getTime() - startofCalc);
+
+    // save_ci_vectors(schd.hdf5_file, ci);
+    // pout << format("\nSaved CI vectors to %s  %12.2f (s)\n\n") %
+    //             schd.hdf5_file % (getTime() - startofCalc);
+
+    // save_determinants(schd.hdf5_file, SHMDets, DetsSize);
+    // pout << format("\nSaved determinants to %s  %12.2f (s)\n\n") %
+    //             schd.hdf5_file % (getTime() - startofCalc);
+
+    // pout << format("\nSaved variational results to %s  %12.2f (s)\n\n") %
+    //             schd.hdf5_file % (getTime() - startofCalc);
   }
 
 #ifdef Complex
